@@ -244,6 +244,8 @@ class StoryMaker extends StoryReader{
     this.x_image = './/*[@name="image"]';
     this.x_balloon = './/*[@name="balloon"]';
     this.x_onclick = '.';
+    this.finalVoice = new FinalVoice();
+    this.useVoice = false;
     this.commandArea = commandArea;
     this.messageTemplate = messageTemplate.cloneNode(true);
     this.messageTemplate.removeAttribute("id");
@@ -338,7 +340,6 @@ class StoryMaker extends StoryReader{
       sceneTag = this.sceneTemplate.cloneNode(true);
     }
     var iconNodes = this.getElementsByXPath(this.x_image,sceneTag);
-    console.log("setScene " + iconNodes[0]);
     iconNodes[0].src = this.getImagePath(imageName);
     if(!sceneTag.parentNode)this.commandArea.appendChild(sceneTag);
     this.actionCSS(sceneTag);
@@ -350,6 +351,7 @@ class StoryMaker extends StoryReader{
     var newMessage = this.makeMessage(id,name,imageName);
 
     this.updateMessage(newMessage,message);
+    if(this.useVoice&&message)this.finalVoice.speak(id,message);
     if(!newMessage.parentNode)this.commandArea.appendChild(newMessage);
     this.actionCSS(newMessage);
   }
