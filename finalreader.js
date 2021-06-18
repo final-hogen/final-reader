@@ -256,14 +256,6 @@ class StoryMaker extends StoryReader{
     this.nexchapter_template = nexchapter_template.cloneNode(true);
     this.nexchapter_template.setAttribute("id","nexchapter");
   }
-  testMessage(){
-    this.jobCommand();
-    this.setCapter();
-    return;
-    var data = this.nextCommand();
-    this.setMessage(data.name,data.name,data.name,data.message);
-    this.setCapter();
-  }
   /**
    * commandを処理する
    */
@@ -277,6 +269,9 @@ class StoryMaker extends StoryReader{
     switch(command.command){
       case this.command_message:
         this.setMessage(command.id,command.name,command.image,command.message);
+      break;
+      case this.command_narration:
+        this.setNarration(command.message);
       break;
       case this.command_scene:
         this.setScene(command.image);
@@ -323,17 +318,37 @@ class StoryMaker extends StoryReader{
    */
   setCapter(){
     var titleTag = document.getElementById("chapter_title");
-    titleTag.innerText = this.getChapterTitle();
+    titleTag.innerHTML = this.getChapterTitle();
     var summaryTag = document.getElementById("chapter_summary");
-    summaryTag.innerText = this.getChapterSummary();
+    summaryTag.innerHTML = this.getChapterSummary();
+  }
+  /**
+   * ナレーション表示
+   * @param {文字*} message 
+   */
+  setNarration(message){
+    var oldNarrationTag = document.getElementById("narration_command");
+    if(!message){
+      if(oldNarrationTag)oldNarrationTag.parentElement.removeChild(oldNarrationTag);
+      return;
+    }
+    var narrationTag = this.narrationTemplate.cloneNode(true);
+    var messageTags = this.getElementsByXPath(this.x_message,narrationTag);
+    messageTags[0].innerHTML = message;
+    if(!oldNarrationTag){
+      if(!narrationTag.parentNode)this.commandArea.appendChild(narrationTag);
+    }else{
+      oldNarrationTag.parentNode.replaceChild(narrationTag,oldNarrationTag);
+    }
+    this.actionCSS(narrationTag);
   }
   /**
    * シーン追加または更新
    */
   setScene(imageName){
     var sceneTag = document.getElementById("scene_command");
-    if(sceneTag&&!imageName){
-      sceneTag.parentElement.removeChild(sceneTag);
+    if(!imageName){
+      if(sceneTag)sceneTag.parentElement.removeChild(sceneTag);
       return;
     }
     if(!sceneTag){
@@ -349,6 +364,10 @@ class StoryMaker extends StoryReader{
    */
   setMessage(id,name,imageName,message){
     var newMessage = this.makeMessage(id,name,imageName);
+    if(!message){
+      if(newMessage.parentNode)newMessage.parentNode.removeChild(newMessage);
+      return;
+    }
 
     this.updateMessage(newMessage,message);
     if(this.useVoice&&message)this.finalVoice.speak(id,message);

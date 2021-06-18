@@ -64,6 +64,7 @@ body {
 }
 
 #select_chapters span {
+  display:inline-block;
   white-space: nowrap;
   margin: 0px 5px;
 }
@@ -79,6 +80,12 @@ body {
   display: none;
 }
 
+#chapter_area h2{
+  margin-bottom: 0;
+}
+#chapter_area p{
+  margin: 0;
+}
 #use_voice{
   text-align: right;
 }
@@ -130,7 +137,10 @@ body {
 .narration p{
   color: white;
   text-align: left;
-  margin:0px auto;
+  margin:0.5rem auto;
+}
+.narration span{
+  display:inline-block;
 }
 
 .character_message {
@@ -193,8 +203,11 @@ body {
   transform: rotate(0deg);
 }
 .says p {
-  margin: 0;
+  margin: 0.5rem 0;
   padding: 0;
+}
+.says span{
+  display:inline-block;
 }
 .character_name {
   margin: 0;
@@ -210,3 +223,32 @@ body {
   transition: all cubic-bezier(0.075, 0.82, 0.165, 1.0) 0.75s;
 }
 
+.yure{
+  animation: mojiyure-y 2s ease-in infinite;
+}
+
+@keyframes mojiyure-y {
+  0% { transform:translateY(-0.1rem) }
+  50% { transform:translateY(0.1rem) }
+  100% { transform:translateY(-0.1rem) }
+}
+
+.miniyure-y{
+  animation: mojiminiyure-y 0.15s ease-in infinite;
+}
+
+.miniyure-x,.miniyure{
+  animation: mojiminiyure-x 0.12s ease-in infinite;
+}
+
+@keyframes mojiminiyure-y {
+  0% { transform:translateY(-0.05rem) }
+  50% { transform:translateY(0.05rem) }
+  100% { transform:translateY(-0.05rem) }
+}
+
+@keyframes mojiminiyure-x {
+  0% { transform:translateX(-0.05rem) }
+  50% { transform:translateX(0.05rem) }
+  100% { transform:translateX(-0.05rem) }
+}
