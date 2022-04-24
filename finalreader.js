@@ -145,6 +145,8 @@ class StoryReader extends StoryAnimation{
     this.command_message = 'message';
     this.command_narration = 'narration';
     this.command_scene = 'scene';
+    this.command_shake = 'shake';
+    this.command_cache = 'cache';
     this.fullJsonData = jsonData;
     this.images = jsonData.images;
     this.chapters = jsonData.chapters;
@@ -250,7 +252,7 @@ class StoryMaker extends StoryReader{
     this.messageTemplate = messageTemplate.cloneNode(true);
     this.messageTemplate.removeAttribute("id");
     this.sceneTemplate = sceneTemplate.cloneNode(true);
-    this.sceneTemplate.setAttribute("id","scene_command");
+    this.sceneTemplate.setAttribute("id","scene");
     this.narrationTemplate = narrationTemplate.cloneNode(true);
     this.narrationTemplate.setAttribute("id","narration_command");
     this.nexchapter_template = nexchapter_template.cloneNode(true);
@@ -268,13 +270,19 @@ class StoryMaker extends StoryReader{
     var command = this.nextCommand();
     switch(command.command){
       case this.command_message:
-        this.setMessage(command.id,command.name,command.image,command.message,command.tel);
+        this.setMessage(command.id,command.name,command.image,command.message,command.tel,command.insert);
       break;
       case this.command_narration:
         this.setNarration(command.message,command.name);
       break;
       case this.command_scene:
-        this.setScene(command.image);
+        this.setScene(command.image,command.insert);
+      break;
+      case this.command_shake:
+        this.setShake();
+      break;
+      case this.command_cache:
+        this.setCache(command);
       break;
       case this.command_clear:
         this.clearCommannds();
@@ -350,8 +358,8 @@ class StoryMaker extends StoryReader{
   /**
    * シーン追加または更新
    */
-  setScene(imageName){
-    var sceneTag = document.getElementById("scene_command");
+  setScene(imageName,insert){
+    var sceneTag = document.getElementById("scene");
     if(!imageName){
       if(sceneTag)sceneTag.parentElement.removeChild(sceneTag);
       return;
@@ -361,13 +369,45 @@ class StoryMaker extends StoryReader{
     }
     var iconNodes = this.getElementsByXPath(this.x_image,sceneTag);
     iconNodes[0].src = this.getImagePath(imageName);
-    if(!sceneTag.parentNode)this.commandArea.appendChild(sceneTag);
+    this.appendCommand(sceneTag,insert);
     this.actionCSS(sceneTag);
+  }
+  /**
+   * コマンドエリアを揺らす
+   */
+  setShake(){
+    const shakeClassName = "quake";
+    var commandArea = this.commandArea;
+    var areaClass = commandArea.className;
+    var classes = areaClass.split(" ");
+    classes = classes.filter(word =>word!=shakeClassName);
+    const oldClassName = classes.join(" ");
+    const newClassName = (!!oldClassName)?(oldClassName+" "+shakeClassName):(shakeClassName);
+    commandArea.className = oldClassName;
+    window.requestAnimationFrame(function(time) {
+      window.requestAnimationFrame(function(time) {
+        commandArea.className = newClassName;
+      });
+    });
+  }
+  /**
+   * データをキャッシュする
+   */
+  setCache(commands){
+    for (const [key, value] of Object.entries(commands)) {
+      switch(key){
+        case 'image':
+        var img = new Image();
+        img.src = this.getImagePath(value);
+        // 読み込んで捨て
+        break;
+      }
+    }
   }
   /**
    * メッセージを追加または更新
    */
-  setMessage(id,name,imageName,message,tel){
+  setMessage(id,name,imageName,message,tel,insert){
     var newMessage = this.makeMessage(id,name,imageName,tel);
     if(!message){
       if(newMessage.parentNode)newMessage.parentNode.removeChild(newMessage);
@@ -376,7 +416,7 @@ class StoryMaker extends StoryReader{
 
     this.updateMessage(newMessage,message);
     if(this.useVoice&&message)this.finalVoice.speak(id,message);
-    if(!newMessage.parentNode)this.commandArea.appendChild(newMessage);
+    this.appendCommand(newMessage,insert);
     this.actionCSS(newMessage);
   }
   /**
@@ -421,5 +461,15 @@ class StoryMaker extends StoryReader{
     onclickString = onclickString.slice(0,index)+nextChapterName+onclickString.slice(index-onclickString.length);
     clickTag.setAttribute('onclick',onclickString);
     this.commandArea.appendChild(nextChapterTag);
+  }
+  appendCommand(commandNode,insert){
+    if(!!commandNode.parentNode)return; //既に表示
+    if(!insert){
+      this.commandArea.appendChild(commandNode);
+    }else{
+      var insertNode = document.getElementById(insert);
+      if(insertNode)this.commandArea.insertBefore(commandNode,insertNode);
+      else this.commandArea.appendChild(commandNode);
+    }
   }
 }
