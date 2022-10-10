@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>ファイナル辞書</title>
+    <link rel="shortcut icon" type="image/png" href="サイトアイコン.PNG">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="style.css" />
+    <script src="finalreader.js"></script>
+    <style type="text/css">
+    #totop {
+      position: fixed;
+      bottom: 20px;
+      left: auto;
+      margin:0 0 0 480px;
+      padding: 10px 15px;
+      border: solid 1px #80808038;
+      border-color: rgba(0,0,32,0.2);
+      background-color: rgba(90, 100, 136, 0.514);
+      border-radius: 18px;
+    }
+    #tagarea img{
+      width:30px;
+      height:30px;
+    }
+    #tagarea p{
+      display: table-cell;
+      vertical-align: middle;
+    }
+    #tagarea a{
+      color: inherit;
+      text-decoration: none;
+    }
+    #tagarea span{
+      display: inline-block;
+      margin: 0 5px;
+    }
+    #search_template{
+      display: none;
+    }
+    .word img{
+      float: left;
+    }
+    h1:before{
+      content: '';
+      width: 60px;
+      height: 60px;
+      display: inline-block;
+      background-size: contain;
+      background-repeat: no-repeat;
+      vertical-align: middle;
+      background-position:center;
+    }
+    div[data-open="0"] h3{
+      color: #00000090;
+    }
+    div[data-open="0"] h3:before{
+      content: '';
+      width: 20px;
+      height: 30px;
+      display: inline-block;
+      background-size: contain;
+      background-repeat: no-repeat;
+      vertical-align: middle;
+    }
+    h1{
+      margin: 10px 10px;
+    }
+    h3{
+      margin: 0px 10px;
+    }
+    .search{
+      text-align: right;
+    }
+    .search_result{
+      display: block;
+    }
+    .word{
+      padding: 10px 15px;
+      border: solid 1px #80808038;
+      border-color: rgba(0,0,32,0.2);
+      border-radius: 18px;
+    }
+    .word:after{
+      clear:both;
+    }
+    #旧世界 h1:before , #ダークメテオ h1:before, #アグネスの関係者 h1:before, #その他 h1:before{
+      background-image: url(./辞書画像/傭兵団ロゴ_15.png);
+    }
+    #ケゲア帝国 h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_3.png);
+    }
+    #アイレタ連邦 h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_7.png);
+    }
+    #ハイクシアー h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_5.png);
+    }
+    #ブラックアーク h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_13.png);
+    }
+    #ヘルシーアンドハッピーエブリデイ h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_11.png);
+    }
+    #パラノイド h1:before {
+      background-image: url(./辞書画像/傭兵団ロゴ_9.png);
+    }
+    #旧世界 div[data-open="0"] h3:before{
+      background-image: url(./辞書画像/かっこいいイブリン.png);
+    }
+    #ダークメテオ div[data-open="0"] h3:before{
+      width: 30px;
+      height: 35px;
+      background-image: url(./辞書画像/ナコトリス.png);
+    }
+    #ケゲア帝国 div[data-open="0"] h3:before{
+      width: 28px;
+      height: 33px;
+      background-image: url(./辞書画像/九条さんチビ_1.png);
+    }
+    #アイレタ連邦 div[data-open="0"] h3:before{
+      width: 25px;
+      height: 35px;
+      background-image: url(./辞書画像/ブレイドチビ_1.png);
+    }
+    #ハイクシアー div[data-open="0"] h3:before{
+      width: 35px;
+      height: 40px;
+      background-image: url(./辞書画像/ニアチビ_1.png);
+    }
+    #ブラックアーク div[data-open="0"] h3:before{
+      background-image: url(./辞書画像/ゼロ.png);
+    }
+    #ヘルシーアンドハッピーエブリデイ div[data-open="0"] h3:before{
+      background-image: url(./辞書画像/ソルヴェイグ.png);
+    }
+    #パラノイド div[data-open="0"] h3:before{
+      width: 28px;
+      background-image: url(./辞書画像/ドロレス.png);
+    }
+    #アグネスの関係者 div[data-open="0"] h3:before{
+      height: 33px;
+      background-image: url(./辞書画像/フェニックス.png);
+    }
+    #その他 div[data-open="0"] h3:before{
+      background-image: url(./辞書画像/団子ちゃんチビ_1.png);
+    }
+    .word div{
+      display: none;
+    }
+    div[data-open="1"] div{
+      display: block;
+    }
+    </style>
+    <script>
+      class FinalDictionary{
+        constructor() {
+          this.words = [];
+          this.openAttribute = 'data-open';
+          this.search_templateString = null;
+          this.search_result_area = null;
+        }
+        init(){
+          var nodeWords = this.getElementsByXPath('//div[@class="word"]');
+          var that = this;
+          for (var i = 0; i < nodeWords.length; i++) {
+            var word = {};
+            word.node = nodeWords[i];
+            word.node.onclick = that.clickWord;
+            word.name = this.getElementsByXPath('.//h3',word.node)[0].textContent.trim();
+            word.text = word.node.textContent;
+            this.words.push(word);
+          }
+          var serchTemplate = document.getElementById('search_template').cloneNode(true);
+          serchTemplate.removeAttribute('id');
+          this.search_templateString = serchTemplate.outerHTML;
+          this.search_result_area = document.getElementById('search_result_area');
+        }
+        getElementsByXPath(expression, parentElement) {
+          var r = []
+          var x = document.evaluate(expression, parentElement || document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
+          for (var i = 0, l = x.snapshotLength; i < l; i++) {
+              r.push(x.snapshotItem(i))
+          }
+          return r;
+        }
+        clickWord(event){
+          if(!event)return;
+          var that = document.finalDictionary;
+          var word = that.getWordfromNode(event.currentTarget);
+          if(!word)return;
+          event.stopPropagation();
+          that.toggleOpen(word);
+        }
+        openWord(word){
+          var that = this;
+          var imgs = this.getElementsByXPath('.//img',word.node);
+          Array.prototype.forEach.call(imgs, function(target) {
+            var s = that.popAttribute(target,'s');
+            if(s)target.setAttribute('src',s);
+          });
+          var as = this.getElementsByXPath('.//a',word.node);
+          var hrefvalue = "javascript:null";
+          Array.prototype.forEach.call(as, function(target) {
+            var story = that.popAttribute(target,'story');
+            var move = that.popAttribute(target,'move');
+            var onclick = null;
+            if(story){
+              var onclick = "showStory('"+story+"',event)";
+            }else if(move){
+              var onclick = "moveWord('"+move+"',event)";
+            }else if(target.hasAttribute('href')){
+              target.setAttribute("onclick","event.stopPropagation()");
+            }
+            if(onclick){
+              target.setAttribute("href",hrefvalue);
+              target.setAttribute("onclick",onclick);
+            }
+          });
+          word.node.setAttribute(this.openAttribute,"1");
+        }
+        popAttribute(target,attname){
+          var value = target.getAttribute(attname);
+          if(value)target.removeAttribute(attname);
+          return value;
+        }
+        toggleOpen(word){
+          var now = word.node.getAttribute(this.openAttribute);
+          if(now=="1")word.node.setAttribute(this.openAttribute,"0");
+          else this.openWord(word);
+        }
+        showWord(title){
+          var word = this.getWordfromTitle(title);
+          if(!word)return;
+          this.openWord(word);
+          var target = word.node;
+          var rect = target.getBoundingClientRect();
+          window.scrollTo({
+            top: rect.top+window.scrollY,
+            behavior: 'smooth'
+          });
+          return word;
+        }
+        getWordfromNode(node){
+          var word = null;
+          for (var i = 0; i < this.words.length; i++) {
+            if(node !== this.words[i].node)continue;
+            return this.words[i];
+          }
+          return null;
+        }
+        getWordfromChild(node){
+          var word = null;
+          while (node.getAttribute('class')!='word') {
+            node = node.parentElement;
+            if(!node)return null;
+          }
+          return this.getWordfromNode(node);
+        }
+        getWordfromTitle(title){
+          var word = null;
+          for (var i = 0; i < this.words.length; i++) {
+            word = this.words[i];
+            if(title == word.name)return word;
+          }
+          return null;
+        }
+        search(keyword){
+          if(keyword)keyword = keyword.trim();
+          var picks = [];
+          if(keyword!="")for (var i = 0; i < this.words.length; i++) {
+            var word = this.words[i];
+            if(word.text.indexOf(keyword)<0)continue;
+            picks.push(this.search_templateString.replaceAll('keyword',word.name));
+            if(picks.length>=15)break;
+          }
+          this.search_result_area.innerHTML = picks.join('');
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="wrapper" style="background-image:url('ノーヴァ背景.JPG');">
+    <div id="conteiner" style="scroll-behavior: smooth;">
+      <div id="content_area" style="position: relative;">
+        <img id="totop" onclick="movetoTop();" height="50px" src="./辞書画像/ナターシャチビ_1.png"/>
+        <div id="logo_area">
+          <img class="logo_image" src="ロゴ_1.png" width="512" height="209" style="transform: translate(-100%, 0px);opacity: 0;" onloadstyle="transform:translate(0px, 0px);opacity: 1;"/>
+          <p>これはファイナルギアの用語を見るためのツールです。それなりのネタバレと推測を含みます。<br/>
+          ナターシャアイコンを押すと一つ前に押したリンクに戻ります。
+          </p>
+        </div>
+        <div class="search">
+          <a id="search_template" class="search_result" href="javascript:null;" onclick="moveWord('keyword',event)">keyword</a>
+          <div>検索<input type="text" onkeyup="searchKeyWord(event)"/></div>
+          <div id="search_result_area"></div>
+        </div><br/>
+        <div id="tagarea">
+          <span><a href="#旧世界"><img src="./辞書画像/傭兵団ロゴ_16.png"/><p>旧世界</p></a></span>
+          <span><a href="#ダークメテオ"><img src="./辞書画像/傭兵団ロゴ_16.png"/><p>ダークメテオ</p></a></span>
+          <span><a href="#ケゲア帝国"><img src="./辞書画像/傭兵団ロゴ_4.png"/><p>ケゲア帝国</p></a></span>
+          <span><a href="#アイレタ連邦"><img src="./辞書画像/傭兵団ロゴ_8.png"/><p>アイレタ連邦</p></a></span>
+          <span><a href="#ハイクシアー"><img src="./辞書画像/傭兵団ロゴ_6.png"/><p>ハイクシアー</p></a></span>
+          <span><a href="#ブラックアーク"><img src="./辞書画像/傭兵団ロゴ_14.png"/><p>ブラックアーク</p></a></span>
+          <span style="font-size:0.6rem;"><a href="#ヘルシーアンドハッピーエブリデイ"><img src="./辞書画像/傭兵団ロゴ_12.png"/><p>ヘルシーアンドハッピーエブリデイ</p></a></span>
+          <span><a href="#パラノイド"><img src="./辞書画像/傭兵団ロゴ_10.png"/><p>パラノイド</p></a></span>
+          <span><a href="#アグネスの関係者"><img src="./辞書画像/傭兵団ロゴ_16.png"/><p>アグネスの関係者</p></a></span>
+          <span><a href="#その他"><img src="./辞書画像/傭兵団ロゴ_16.png"/><p>その他</p></a></span>
+        </div>
+<div id="旧世界">
+  <h1>旧世界</h1>
+  <div class="word" data-open="0">
+    <h3>崩壊前の世界</h3>
+    <div>メテオインパクト以前は人類がもっとも繁栄した時代であり、崩壊後の世界より高い技術力を持っていた。<br/>
+    いくつかの施設は崩壊後も現存している。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>メテオインパクト</h3>
+    <div><img width="30%" s="./辞書画像/隕石衝突.jpg"/>旧暦2110年、『メテオインパクト』と呼ばれる隕石衝突により人類文明は地上からほぼ消滅した。<br/>
+    人類は生き残るため衛星や地下に避難した。これらの計画は『アポカリプス・エクソダスー方舟生存計画』と呼ばれる。<br/>
+    再び人類が地上に戻るまでには数百年の時を要した。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>BNF歴</h3>
+    <div>崩壊前の世界で使用されていた年号。詳細は不明。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>衛星世界</h3>
+    <div>一部の人々は地上を離れ、星の衛星に避難した。この計画は『サンタドリア』計画と呼ばれた。<br/>
+    衛星に避難するには多額の資金が必要で、衛星に避難した人々は富裕層に限られた。<br/>
+    後の<a move="星神教">星神教</a>となった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>電子世界</h3>
+    <div><img width="30%" s="./辞書画像/イブリンの両親.jpg"/>一部の人々は意識を電子化し、仮想の電子世界に避難した。この計画は『サイバーアーク』計画と呼ばれた。<br/>
+    電子化にはあまり費用が掛からず、多くの一般人はこの方法を選択した。電子化した人々の肉体は凍結保存された。<br/>
+    人々は電子世界で年を取ることも繁殖することもなく数百年の時を過ごした。長い年月電子世界で過ごした人間は現実の世界に耐えられなくなり、簡単には現実世界に戻れなくなってしまった。そのため現実に戻った先例のイブリンや<a move="団長">団長</a>を探し、現実世界の人間を攫って実験なども行っている。<br/>
+    『イブリンストーリー』の舞台。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>海底世界</h3>
+    <div><img width="30%" s="./辞書画像/シグリッドとパール.jpg"/>一部の人々は海底に避難した。この世界は『<a story="八足号の呪い">八足号の呪い</a>』で登場。<br/>
+    長びく海底での生活の中で人々は水中での呼吸や高い水圧に耐える技術を獲得したが、逆に海から離れられない体質となってしまっている。<br/>
+    その正確な位置は不明だが、ケゲアとアイレタの間にある<a move="ジヌンガ海峡">ジヌンガ海峡</a>を避け<a move="千島国">千島国</a>に海路で渡るならば大きく北から回るか南から回るかしかない。南の海域では<a move="ヴァイン港">海のモンスター</a>が目撃されており、この付近の海域である可能性が高い。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>地下世界</h3>
+    <div>エリザベスが訪れたという世界。ゲーム中にはまだ登場していない。<br/>
+      <a move="イーノル人">イーノル人</a>との関係は不明。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="ダークメテオ">
+  <h1>ダークメテオ</h1>
+  <div class="word" data-open="0">
+    <h3>ダークメテオ</h3>
+    <div><a move="メテオインパクト">メテオインパクト</a>により飛散したとされる物質。ダークマテリアルや黒曜石などとも呼ばれる。<br/>
+    現代ではエネルギー源として利用されており、多く産出されるネブラ地域では各勢力による奪い合いが頻繁に起こる。<br/>
+    金属や機体を浸食することがあり、浸食されたものは勝手に動き出す。人も取り込むことがある。<br/>
+    その後の研究で人の意識の共有などの効果があることも判明した。<br/>
+    『クロベルの影』ではダークメテオ、機械、人間が融合したヒューマンコアが登場する。<br/>
+    多くの研究者はあれは隕石などではないと語っている。また一部の人間は<a move="イーノル人">イーノル人</a>の宇宙船ではないかと考えている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>クロベル</h3>
+    <div><img width="25%" s="./辞書画像/ノーヴァ.jpg"/><a move="メテオインパクト">メテオインパクト</a>の落下地点。<br/>
+    周囲は高濃度のダークメテオに汚染されており、通常人は住めない。ダークメテオに適応できた人間だけが人形使いとなりわずかに生き残っている。<br/>
+    夜になるとノーヴァが出現する。地下に<a move="イーノル人">イーノル人</a>の遺跡がある。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>人形使い</h3>
+    <div><img width="25%" s="./辞書画像/フェニックスvsルビー1.jpg"/>先天的に、あるいはアグネスらの改造によってダークメテオを利用できるようになった人間。<br/>
+      ダークメテオに取りつかれた機体や人間を操ることができる。また、ダークメテオの特性によりごくまれに『魂の融合』という現象が発生する。この現象は『<a story="空の鏡">空の鏡</a>』に登場した。<br/>
+      イーレヒース、フェニックス、PN99、ルビーとメレディスなど多数の人間が該当する。<br/>
+      一部の人形使いは意図的に機体や人間にダークメテオを取りつかせ、操ることができる。『勢力戦前哨』に登場した。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>傀儡</h3>
+    <div>ダークメテオと融合し、人形使いに操られる存在。黒い部分が大きいのでレベリカには『黒ちゃん』と呼ばれている。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="ケゲア帝国">
+  <h1>ケゲア帝国</h1>
+  <div class="word" data-open="0">
+    <h3>ケゲア帝国の成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/ケゲアの街.jpg"/>大陸東部に位置し、もっとも人口の多い地域にケゲアの前身となる国は誕生した。当初は議会制の国だったが、約60年前、1人の議員が皇帝となり、ケゲア帝国が誕生した。現在の新暦は帝暦でもある。<br/>
+      初代帝国皇帝は第一次侵略戦争を開始し、一気に国土を拡大した。現在の国土はこのころに定まった。<br/>
+      その後女王リサが帝位を継承し、約5～2年前<a move="第2次侵略戦争">第2次侵略戦争</a>を開始するが、現在のアイレタとなる抵抗軍(ケゲアは反乱軍と呼んだ)との抗争中に娘のリリアンがクーデターを起こしリサ政権は崩壊。現在の女王はリリアンとなっている。<br/>
+      リリアンの治世は概ね好評だが、それはリリアンが目的を達成するための手段の一つに過ぎない。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>女王リサ</h3>
+    <div><img width="25%" s="./辞書画像/女王リサ.jpg"/>先代のケゲア女王。リリアンの母に当たる。<br/>
+      残酷な女王として知られ、敵対するものや失敗するものは容赦なく処刑した。国民にも容赦なく、密告や冤罪によって裁判もなく処刑されたものが多かった。<br/>
+      リリアンのクーデター後はどこかに幽閉されているともすでに死亡しているとも言われる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>反女王派</h3>
+    <div>女王リリアンと敵対する派閥。ベルフォード伯爵など多くの帝国貴族が含まれる。<br/>
+      ベルフォード伯爵の死後一斉決起するが、リリアンによって一掃されようとしている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>帝国貴族</h3>
+    <div>帝国の領土は皇帝が治めるドリアン、それ以外の地域は上級貴族が治める領地にわかれている。<br/>
+      女王リサの時代までは各領土は貴族の絶対的な支配地域であり、大きな権力を振るえた。犯罪が横行する領地もあり民の生活や命は貴族次第だった。<br/>
+      リリアンの時代からは貴族は好き勝手出来なくなり、リリアンの思想に共感できない多くの貴族は反女王派となった。<br/>
+      このため新女王派と反女王派で小競り合いも起きるようになった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>騎士団</h3>
+    <div>代々帝国の帝位につく者に仕える直属の騎士団。女王リサ以降は『女王の剣』とも呼ばれている。<br/>
+      皇帝直属の近衛騎士団や教会付きの藍河騎士団など色々な騎士団がある。かつてアイレタに侵攻したコーレリアも騎士団長。
+      彼らの皇帝に対する忠誠は絶対的なものだったが、リリアンのクーデター以降は分裂気味となった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>帝国の4騎士</h3>
+    <div><a move="第2次侵略戦争">第2次侵略戦争</a>中に活躍した帝国の騎士。騎士団長コーレリア、ホークアイ・ヘプニェク、剛腕騎士フェニックス、鉄壁騎士エイミー。<br/>
+      帝国の精鋭として何度もアイタ達と激しい戦いを繰り広げた。<br/>
+      しかし現在は2名しか残っておらず、その栄光は失われている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ドリアン軍</h3>
+    <div><img width="30%" s="./辞書画像/クリスタとリリアン.jpg"/>帝国の首都ドリアンの軍隊。領主の私兵同様リリアンの私兵と言える。<br/>
+    リリアンが直接スラムから抜擢したエロイース、クリスタが将軍を務め、常勝将軍と呼ばれるほどの戦績を誇る。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ブラックピエロ</h3>
+    <div>黒き道化師とも呼ばれる。ケゲア帝国設立初期から存在する古い組織。<br/>
+      主にケゲアのために破壊工作や暗殺などを行う裏の組織であり、必ずしも皇帝直属ではない高い独立性を持った組織。そのためケゲアの利益に反する行動をとることもある。<br/>
+      直接的な暗殺はもちろん、他国に武器をばらまくなど間接的な破壊発動も行う大きな組織。所属メンバーも多い。<br/>
+      現在のボスはインペリア、戦闘員にココ、サリエル、ハッカーのセラフィエル、経理担当のネプリムなどがいる。また以前は戦闘員の鬼影灯、暗殺者のヘレーナなども在籍していた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>帝国情報部</h3>
+    <div>ケゲア正規の工作部隊。ミロアが部長を務め、部下にヤマガラ、ポーラーなどがいる。<br/>
+    ブラックピエロ同様暗殺や破壊工作などを行うが、こちらは正規の命令でない限り動くことはない。<br/>
+    『<a story="研究所での些事">研究所での些事</a>』や『<a story="悪運娘と讃美歌">悪運娘と讃美歌</a>』に登場。</div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>グレイイーグル</h3>
+    <div><a move="第2次侵略戦争">第2次侵略戦争</a>中<a move="ブラックアークの成り立ち">ブラックアーク</a>に続いて第2位だった傭兵団。『<a story="小酌の夜話">小酌の夜話</a>』で過去の話として登場した。<br/>
+    副団長はヴァレリア。実質ヴァレリアの傭兵団だが団長は空席となっている。構成兵士の多くは<a move="北軍">北軍</a>の投降兵と考えられる。</div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>千島国</h3>
+    <div><img width="30%" s="./辞書画像/お参り.jpg"/>ケゲア北東の諸島部にあるとみられる国。独立した国家なのかケゲアの属国なのかは不明。<br/>
+      日本に似た文化を持っており、剣術や弓術が盛ん。年末にはカウントダウンも行う。『<a story="雪融けの刻">雪融けの刻</a>』に登場。<br/>
+      各地域は『家』と呼ばれる一族によって統治されており、九条綾、神上園凛、西園寺桜はそれぞれ家の次期当主。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ケゲア内乱</h3>
+    <div>ベルフォード伯爵の死をきっかけに新暦60年8月、ケゲア内部で貴族同士の衝突が発生、瞬く間にケゲア全土での内乱となった。<br/>
+      この話は『マーグレットストーリー』『勢力戦前哨』『<a story="国境紛争">国境紛争</a>』で語られる。<br/>
+      これは意図的に内乱を起こさせ、他勢力との抗争に発展さて<a move="ファントム計画">ファントム計画</a>で全ての敵対勢力を一掃するリリアンの計画であった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>RN-ヴァルキュリア</h3>
+    <div><a move="ファントム計画">ファントム計画</a>の核となるベースカー。リンベル博士によって開発された。<br/>
+      四足歩行の大型機体のような姿をしており、遠距離攻撃を得意としている。多くのサイボーグ兵士を搭載できる。<br/>
+      他勢力のベースカーより一歩抜きんでた性能を持っているため、新暦61年8月の『全面戦争』ではケゲア有利と言われている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ファントム計画</h3>
+    <div>リリアンが<a move="反女王派">反女王派</a>や他勢力を一掃するため準備していた計画。『<a story="国境紛争">国境紛争</a>』の最終局面で発動された。<br/>
+      α-16が使用した個人武装、フェニックスに使用されたサイボーグ技術、<a move="ダークメテオ">ダークメテオ</a>での意識共有技術などが使用され、個々の戦闘力が非常に高く通常ではありえないほどの組織的連携が可能になった。<br/>
+      圧倒的戦闘能力と引き換えにブレインとなった人間への負荷が高く、数日使用すれば正気を保てなくなる。ブレインが倒されてしまえばただの強い兵士の集まりでしかなくなるなどの欠点もある。<br/>
+      プロジェクト発動直後にブレインがハエラによって連れ去られたため、長期間の活動停止を強いられた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ハイマー将軍</h3>
+    <div><a move="第2次侵略戦争">第2次侵略戦争</a>で先頭を切って侵攻した将軍。ステージ1-1でアイタに瞬殺された。<br/>
+      その後ケゲア本国に逃げ帰ったが<a move="女王リサ">女王リサ</a>によって処刑され、ほとんど機械の体のサイボーグとして再び第2次侵略戦争に投入されたが、『<a story="彼方の風">彼方の風</a>』でゼロによって倒された。ハイマー将軍のサイボーグコアは<a move="フェニックス号">フェニックス号</a>のコアとしてリサイクルされた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>極夜計画</h3>
+    <div><a move="第2次侵略戦争">第2次侵略戦争</a>中、ケゲアの一部の将校によって計画実行された非人道的作戦。<br/>
+      形勢不利となっていたケゲア軍の一部将校がアイレタ軍の士気を折るため、密かに<a move="ジヌンガ海峡">ジヌンガ海峡</a>を渡り、アイレタの複数の居住区を襲撃、兵士の家族らを虐殺した。<br/>
+      あまりに凄惨な殺戮は作戦に参加した兵士の心をも壊すほどだった。事態を重く見たケゲア情報部は作戦から帰還した部隊を帰り次第すべて処刑し、その痕跡を抹消した。<br/>
+      しかし類まれな生存能力を発揮してレナータは処刑を逃れ、アイレタに潜伏した。だが心を病んでいたレナータはアイレタの街で殺人を繰り返した。この話は『待ちきれない夜明け(日本版未実装)』に登場する。<br/>
+      その後逮捕されたレナータは極夜計画の生き証人として<a move="アイレタ大監獄">アイレタ大監獄</a>に投獄された。投獄後の話は『<a story="悪運娘と讃美歌">悪運娘と讃美歌</a>』に登場。<br/>
+      その後レナータは<a move="帝国情報部">帝国情報部</a>によって証言不能の状態となり、現在も極夜計画の全容は掴めないままとなっている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ミシェール監獄</h3>
+    <div>ミカエル監獄とも呼ばれる。収監された犯罪者を人体実験に利用していた。ある時囚人の一人がゾンビ化し、あっという間に監獄はゾンビだらけとなった。事態を収拾できなくなったケゲア軍は監獄ごとコンクリで埋めるというおおざっぱな方法で幕引きを図った。そのため今でも地下でゾンビたちがうごめいている。シュミリはここのゾンビたちのリーダー。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>星神教</h3>
+    <div>ケゲアの国教。衛星に住む人々を崇める。それらは<a move="衛星世界">サンタドリア計画</a>で衛星に移住した人々である。<br/>
+      シャコガイやコディスは『天上人』と呼ばれる衛星に住む人で、『執行官』という肩書は天上人としての役割であると考えられる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>悪魔教</h3>
+    <div>ベルナデットが警護するカルト教団。<br/>
+      <a move="ダークメテオ">ダークメテオ</a>に関する重大な秘密を握っているとされている。しかしPN99の目覚めにより壊滅した。<br/>
+      『<a story="メインストーリー">メインストーリー</a>』でイブリンたちが調査に入り、『<a story="嵐の夜のおとぎ話">嵐の夜のおとぎ話</a>』にPN99の悪夢として登場する。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>星神教会</h3>
+    <div>ロクサーヌが所属する星神教の教会。<a move="反女王派">反女王派</a>に属している。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>藍河騎士団</h3>
+    <div>教会を守るための騎士団。しかし現在は教会派とは紛争中。リリアンとの折り合いも悪い。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>聖殿山</h3>
+    <div><a move="星神教">星神教</a>が聖地と崇める山。登山も盛ん。<br/>
+      しかし現在は教会と藍河騎士団の一大係争地となっている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ケゲア南西部</h3>
+    <div>なにかの実験によって汚染された地域が広がっており、<a move="アグネス">アグネス</a>が眠っていた地域。<br/>
+      <a move="第2次侵略戦争">第2次侵略戦争</a>末期に『<a story="国境紛争">国境紛争</a>』のフラビアの話によるとゼロが真っ先に制圧した地域でもあり、なにかがあると予想される地域。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>帝国フォーグリン学院</h3>
+    <div>帝国の軍事学校。大陸最大の軍学校であるため、現在他勢力にいる人間もここの出身者であることが多い。<br/>
+      表向きは通常の軍学校だが、研究所では人間兵器の研究を行っている。被検体100番のスノーウィ、<a move="被検体663番">663番</a>のイヴェットなどもここで実験が行われた。フラビアとパトリシアがここの研究員だった頃の話は『<a story="国境紛争">国境紛争</a>』に登場する。<br/>
+      ここの出身者は教官のフラビア、研究者のパトリシア、元学生のベルナデット、神上園凛、紫、華蘭、ジャスミン、被検体スノーウィ、イヴェットなど多い。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>リンベル研究所</h3>
+    <div>リリアンによって見出された天才リンベル博士の研究所。本来の専門は融合実験。<br/>
+      リンベル自身は融合実験にしか興味はないが、ケゲアからの援助を引き出すため機体の設計やホムンクルスの製造など幅広く行っている。プリンの専用機もリンベル博士の設計。リンベル博士が開発したものにはRNの開発コードが与えられる。<br/>
+      人体実験なども行っているが被験者には給与などの待遇を約束し、実験の成果たちと一緒に暮らすなど変な倫理観を持っている。<br/>
+      研究員としてニッジーやスウィーティー、メイメイ、戦闘員としてα-16が所属している。<br/>
+      ケゲアの軍事技術の集大成ともいえる<a move="ファントム計画">ファントム計画</a>もほぼリンベル博士一人によって完成された。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>シェイド研究所</h3>
+    <div>北軍(現在のアイレタ)とケゲアの国境付近にあったとされる研究所。<br/>
+      無人機やホムンクルスなどの製造が専門であり、アリエルはここで製造された。<a move="第2次侵略戦争">第2次侵略戦争</a>の際アイタらによって破壊された。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アウグスティヌス研究所</h3>
+    <div>オーガスティン研究所やラボラトリー・オブ・レジェンドと呼ばれることもある。<br/>
+      所長は<a move="アンドレイ・アウグスティヌス">アンドレイ</a>。<a move="アグネス">アグネス</a>もかつてここに所属していた。旧世界から残っている研究所だが、現在はほぼ無人となっている。<br/>
+      かつて<a move="黒皇后聖典">黒皇后聖典</a>の解読研究を行っていた施設でもある。</div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>オスフィルド工会</h3>
+    <div>ケゲアの量産機の製造を一手に担っている会社。図鑑にのみ登場。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="アイレタ連邦">
+  <h1>アイレタ連邦</h1>
+  <div class="word" data-open="0">
+    <h3>アイレタ連邦の成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/アイレタの街.jpg"/>アイレタ連邦は大陸北部、ケゲアの北西に位置する。複数の都市国家が集まった連邦制度をとっている。<br/>
+    数年前まではアイレタ連邦は存在しておらず、この地域には複数の都市が散在するだけだった。しかし<a move="第2次侵略戦争">第2次侵略戦争</a>によってケゲアが侵攻してくると都市同士が団結し、結果的にアイレタ連邦が誕生するきっかけとなった。<br/>
+    5つの自治区域から成り立っており、統治者は選挙によって選ばれる。<a move="アイレタ連邦保安部">アイレタ連邦保安部</a>や連邦裁判所は5つの自治区を統括する存在。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>第2次侵略戦争</h3>
+    <div><img width="100%" s="./辞書画像/旧ファイナルギア青.jpg"/>新暦55年～新暦58年の間に起こったケゲア帝国と現在のアイレタ地域の戦争。ケゲア帝国を収める<a move="女王リサ">女王リサ</a>が大陸北西部の現アイレタ地域に進攻したことから始まる。<br/>
+    現アイレタの東部にある新城に住んでいたアイタは帝国から離反したグレイブを成り行きで助け、行動を共にする。最初はケゲア軍から逃げていたアイタであったが徐々に仲間を増やしていき抵抗軍を結成、ケゲア軍を撃退することに成功する。その後抵抗軍が中心となりアイレタ連邦が発足した。<br/>
+    アイレタはケゲア帝国に向けて反転攻勢を行うが、ケゲアでクーデターにより実権を掌握したリリアンが瞬く間に体勢を立て直し逆にアイレタ軍を撃退した。この間隙を縫ってナコトリスはハイクシアーを設立。結果的に三つ巴の状態となり、現在に至る。その後しばらくは<a move="平和の時代">平和の時代</a>と呼ばれた。<br/>
+    この戦争の終盤はゼロ視点で『<a story="彼方の風">彼方の風</a>』に登場する。<br/>
+    また、第2次侵略戦争全体はファイナルギアのβ版として中国地域で『<a href="https://www.bigfun.cn/post/222465" target="_blank">重装战姬(中国語)</a>』としてゲーム化されていた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>総統派</h3>
+    <div>アイレタを治める総統の派閥。軍団長派とは犬猿の仲である。<br/>
+      連邦の統治などは総統の管轄となっている。<a move="アイレタ連邦保安部">アイレタ保安部</a>は総統の管轄下にある。<br/>
+      ケゲアとの戦争を望む主戦派。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>軍団長派</h3>
+    <div><img width="30%" s="./辞書画像/モルガンとミリーナ.jpg"/>モルガン・ヘリング元帥の派閥。軍や<a move="アイレタ第1研究所">研究所</a>は元帥の管轄下にある。<br/>
+      かつて抵抗軍として活躍したメンバーがこの派閥のため発言力が強い。<br/>
+      ケゲアとの戦いを望まない反戦派。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>北軍</h3>
+    <div><img width="25%" s="./辞書画像/ナターシャ.jpg"/>かつてケゲアの北には北軍と呼ばれるケゲア帝国と対立している地域があった。北軍はアイレタ地域では最も大きな組織だった。指導者はナターシャの父であるコフスキ。<br/>
+      しかしケゲアのスパイであるヴァレリアが北軍に潜入しコフスキの妻となると、そのカリスマ性で北軍の指揮系統は分裂、瓦解しケゲアへの抵抗力を失った。ナターシャは抵抗軍のアイタへ支援を送ることで細々とケゲアへの抵抗を続けるしかなかった。<br/>
+      アイタによってヴァレリアが撃退されるとほとんどの北軍兵士はヴァレリアとともにケゲアに投降してしまった。その戦力はケゲアの傭兵団<a move="グレイイーグル">グレイイーグル</a>となった。一部の兵士はナターシャと共に抵抗軍に加わり、その後アイレタの北軍部隊となった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アルカナ小隊</h3>
+    <div><img width="20%" s="./辞書画像/アルカナ.jpg"/>巨大合体ロボアルカナを使用する極秘特殊部隊。隊長はレンゲル、隊員はブレイド、ギャレン、チャリス。それぞれタロットカードのコードネームが与えられている。<br/>
+      通常は4機のアイレタ量産型のカスタム機だが、合体することで巨大ロボとなる。<br/><br/>
+      <a style="clear: both;" href="https://twitter.com/finalgear_jp/status/1430792340097011713" target="_blank">合体動画公式ツイート</a>
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>熱核反応小隊</h3>
+    <div>アイレタの特殊部隊。隊長はメガラ、隊員はスカーレット、カムネール、アウロラ。『<a story="ヘンテコ漫画家">ヘンテコ漫画家</a>』にフルメンバーが登場する。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アイレタ連邦保安部</h3>
+    <div><img width="30%" s="./辞書画像/アイレタ保安部.jpg"/>アイレタの5つの区にまたがる捜査や警護などを行う組織。現代のFBIのようなもの。<br/>
+      所長のアドリアンヌを始め、ジゼル(ギゼル)、マッケンジ、ストレンジャーやバスカヴィルやその他大勢など多くの捜査官が在籍しているが、そのほとんどがアドリアンヌが「美しい娘」を個人的に集めたメンバー。アドリアンヌは通常仕事もせず誰かとイチャイチャしているだけである。だが頭が非常に切れるやるときはやる人物。<br/>
+      アドリアンヌが好きに振る舞えるのは彼女が<a move="総統派">総統</a>の娘だからという噂がまことしやかに囁かれている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アイレタ第1研究所</h3>
+    <div><img width="30%" s="./辞書画像/研究所.jpg"/>アイレタの軍事研究所のトップ機関。複数の部署に研究を競わせることで大きな成果を上げている。『<a story="研究所での些事">研究所での些事</a>』や『<a story="ヘンテコ漫画家">ヘンテコ漫画家</a>』の舞台。<br/>
+      エース研究部の部長はナキア、別の部の部長にマーナ、部下にケゲアのスパイポーラーがいる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>賞金ハンター組合</h3>
+    <div>アイレタに本部がある賞金稼ぎのための組合。その活動は大陸全土を対象としている。<br/>
+      主に賞金首の逮捕や殺害、人や物資などの護衛が任務。<a move="団長">団長</a>にも賞金がかかっている。現在のNo1賞金稼ぎはリー。<br/>
+      かつては賞金稼ぎから法外な手数料を巻き上げる悪徳組織だったが、『罠に気を付けて(日本未実装)』の事件以降は真っ当な組織になった。<br/>
+      リー、神上園凛、ジェシー、ゾーイ、ヨランダ、ジャスミン、レベリカ、鬼影灯、デボラなどが所属している。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アイレタ大監獄</h3>
+    <div><img width="30%" s="./辞書画像/監獄外.jpg"/>一般の犯罪者から重犯罪者まで数多くの犯罪者を収監している監獄。所長はシャルンだが、<a move="アイレタ連邦保安部">アイレタ連邦保安部</a>の管理下でもある。<br/>
+      高いセキュリティを持つ監獄ではあるが、<a move="帝国情報部">ケゲア情報部</a>の工作があった際は収容人数の多さが仇となった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>新星教</h3>
+    <div>アイレタの国教。セレニティが所属する。<a move="星神教">星神教</a>との関係は不明。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ナイトアウル</h3>
+    <div>アイタの浮遊技術とポーラーの<a move="アンチフレア電磁シールド">メガポーラーランチャー</a>を4門装備した戦艦型の最新鋭ベースカー。<br/>
+      他の勢力のようなとがった性能ではないため、意外と扱いが難しい。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アンチフレア電磁シールド</h3>
+    <div>『<a story="研究所での些事">研究所での些事</a>』でポーラーが偶然完成させた技術。これにより武器の出力がより大きく出せるようになった。<br/>
+      ポーラーの専用機や<a move="ナイトアウル">ナイトアウル</a>の主砲にも採用されている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>レイガード</h3>
+    <div><img width="25%" s="./辞書画像/レイガード.jpg"/>アイレタの5つある自治区の1つ。『<a story="攻殻機動隊">攻殻機動隊コラボ</a>』で登場。<br/>
+      自己進化するAIによって統治されており、人々はその指示に依存しきっている。そのためAIが自己の進化のために暴走しても盲目的に従った。<br/>
+      イブリンらによってAIが破壊され、数々の人体実験などの悪歴が暴露されてからは自治権剥奪の危機にある。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アイタ市</h3>
+    <div><a move="第2次侵略戦争">第2次侵略戦争</a>で功績をあげた報酬としてアイタが市長となった都市。どこにあるのかは不明。副市長はグレイヴ。市民は苦労してそう。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>電子教</h3>
+    <div>サイバー教とも呼ばれる。名前から<a move="電子世界">電子世界</a>との関係が疑われたが、技術が低く詐欺まがいのことばかりやっているので、関係性は低いようだ。<br/>
+      クリスティーナが潜入捜査を行ったり経営するバーを襲撃されたりと暗闘が行われている。調査の結果<a move="アグネス">アグネス</a>を神と崇め、電子化計画という謎の計画を行っていることが判明した。<br/>
+      また、『<a story="空の鏡">空の鏡</a>』ではルビーに薬を売りつける(ルビーに強奪された？)などを行っていた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ラプール山</h3>
+    <div>アイレタ南部の山岳地帯。その地下には<a move="電子世界">電子世界</a>が隠されていた。『イブリンストーリー』の舞台。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ComiBoni</h3>
+    <div><img width="25%" s="./辞書画像/comiboni.jpg"/>クリスティーナが経営するバー。探偵事務所でもある。『リーの個人ストーリー』の最後で電子教に襲撃されたがPN99のおかげで事なきを得た。<br/>
+     『<a story="おはようネクリエス">おはようネクリエス</a>』の舞台。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ジヌンガ港</h3>
+    <div><a move="ジヌンガ海峡">ジヌンガ海峡</a>に面するアイレタの港。ケゲアに近いためしばしば軍事港として利用される。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ヴラミルインダストリ</h3>
+    <div>パンドラの父ディミュが経営する武器会社。多くの一般的な武器やアイレタ量産機の製造を行っている。<br/>
+      『<a story="紅茶計画">紅茶計画</a>』に登場。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>デコリーインダストリ</h3>
+    <div>ミラベルが経営する会社。ヴラミルインダストリとはライバル関係。<br/>
+      元々は大手運送会社で、製造業やサービス業にも参入している。<br/>
+      アイタ設計の下、巨大合体ロボ<a move="アルカナ小隊">アルカナ</a>の製造もおこなった。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="ハイクシアー">
+  <h1>ハイクシアー</h1>
+  <div class="word" data-open="0">
+    <h3>ハイクシアーの成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/ハイクシアーの街.jpg"/>元々ハイクシアーを含む砂漠地帯はメンテナンスで生計を立てている者や多数の武装組織などが入り乱れる無法地帯だった。それでも人々住む街はノイジータウン(騒々しい街)と呼ばれるほど活気があふれ、生活力にあふれていた。<br/>
+      そこに突如としてナコトリスらの魔女グループが現れ、数々の組織を統合し、街は一大工業都市へと発展した。そしてハイクシアーが設立された。<br/>
+      ハイクシアー設立の詳細は不明だが、ナコトリスはハイクシアーの人々のために国を設立したのではなく、この地域の人々の力を借りるために設立したようだ。本人は目的を達成した後、後世の人に稀代の悪人として評されるだろうと言っている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>魔女</h3>
+    <div><img width="100%" s="./辞書画像/魔女.jpg"/>ナコトリスと共に最近になってハイクシアーに現れたグループ。『魔女システム』と呼ばれる奇妙な技術を持つ。<br/>
+      ソラル、フェヴィア、チリノ、バソリーの4人は四大魔女と呼ばれている。他にマルマ、ミシェリア、ニア、ヴァイオレットも所属している。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>創設家</h3>
+    <div>創設者や創設一家などとも呼ばれる。ハイクシアー地域に昔から住むメンテナンスなどを生業としているグループ。<br/>
+      現在の当主はスモラ。最近はナコトリスに依頼されて多くの機体などを製造している。部下のオパールは高性能な義肢なども製造している。義肢の話は『<a story="月面大暴走">月面大暴走</a>』に登場する。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>シェイプシフター</h3>
+    <div>アレクサによって最近設立されたグループ。部下はフーラ、オードリー。<br/>
+      アレクサの話は欺瞞に満ちていて、簡単に人を騙す。『<a story="トリックアンドトリート">トリック＆トリート</a>』では<a move="平和維持隊">平和維持隊</a>と<a move="剃刀団">剃刀団</a>を戦わせ、『<a story="メインストーリー">メインストーリー</a>』5章ではイブリンが騙されてアレクサの敵対勢力と戦わされた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>審判の星</h3>
+    <div>処刑人家族などとも呼ばれる。ハイクシアー地域に昔から住む。リーダーはシンシア。部下はオイフェ、スラ。<br/>
+      『オイフェの個人クエスト』を見る限り<a move="シェイプシフター">シェイプシフター</a>とは仲がよくない。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>SweetQueen</h3>
+    <div>法の執行一家、法の番人などとも呼ばれる。ハイクシアー地域に昔から住む。<br/>
+      現在の当主はパッティ。部下としてカラマス、ペイズリーなどがいる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>剃刀団</h3>
+    <div>数あるハイクシアーの組織の一つ。強盗などを行っていた。<br/>
+      『<a story="トリックアンドトリート">トリック＆トリート</a>』でアレクサの策略によって壊滅した。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>平和維持隊</h3>
+    <div>数あるハイクシアーの組織の一つ。『<a story="トリックアンドトリート">トリック＆トリート</a>』に登場。<br/>
+      元保安官のジェシーとの関係は不明。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>砂漠暴走族</h3>
+    <div>組織などではなく、ただの同じ趣味の集まりの模様。『<a story="サクラ大戦">サクラ大戦コラボ</a>』に登場。<br/>
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>イモータルフォトレス</h3>
+    <div>ナコトリスの設計の下、スモラが作成したハイクシアーのベースカー。ティラノサウルスのような外見をしておりバイオ装甲を採用している。接近戦が得意。ブラックホールを放出する<a move="魔女">魔女</a>の技術が使用されている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ハイクシアー学院</h3>
+    <div><img width="30%" s="./辞書画像/ハイクシアー学院.jpg"/><a story="退屈な日常">退屈な日常</a>の舞台。<br/>
+      色々なサークルなどがある一般的な大学のようなところ。軍事学校というわけではないが、ハイクシアーの人々は幼少のころから機体に乗る習慣があるため、学院内でも普通に機体が使用されている。<br/>
+      学長はフレイダ。教師にユニス、レイラニ。現在の学生はゼノビア、ナオミ、ストラ、ミナヅキ。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ヴァイン港</h3>
+    <div>ハイクシアーにある小さな港。近くに海のモンスターが出ると騒ぎになっている。<br/>
+      イブリンらの調査によると海のモンスターは機械生物だった。大陸に存在するものではないとも。<br/>
+      <a move="海底世界">海底世界</a>との関係は不明。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="ブラックアーク">
+  <h1>ブラックアーク</h1>
+  <div class="word" data-open="0">
+    <h3>ブラックアークの成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/ブラックアーク.jpg"/><a move="第2次侵略戦争">第2次侵略戦争</a>中に立ち上げられ、No1の傭兵団となった組織。ゼロ、<a move="ハゲワシ">ハゲワシ</a>、ミリーナ、ポーラ、レベリカ、イブリン、団長、ヴェロニカなどが在籍していた。<br/>
+      第2次侵略戦争終結後傭兵団は解散され多くのメンバーはアイレタの一員となったが、<a move="団長">団長</a>だけが勝手にブラックアークを名乗って活動を続けている。<br/>
+      傭兵団設立のきっかけは『<a story="彼方の風">彼方の風</a>』に登場する。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>フェニックス号</h3>
+    <div><img width="100%" s="./辞書画像/フェニックス号.jpg"/>ブラックアークのベースカー。ブラックアーク解散後は<a move="ハゲワシ">ハゲワシ</a>が受け取り、そのまま<a move="団長">団長</a>へ譲渡された。<a move="第2次侵略戦争">第2次侵略戦争</a>中は一時期アイタも同乗していた。<br/>
+      基本設計はポーラとハゲワシだが、メインのエネルギーコアにはゼロが奪取した<a move="ハイマー将軍">ハイマー将軍</a>のコアが使用されている。<br/>
+      大型武装と機体の格納庫はもちろん、食料や水の生産設備、寮、バーなども完備された独立作戦行動可能な高機能ベースカー。<br/>
+      だが団長が受け継いだころには色々壊れていて大変だった。しかも今でも多額のメンテナンス費用が必要でずっとメンバーを苦しめ続けている。<br/>
+      『<a story="イブリンの戦術シミュレーション">イブリンの戦術シミュレーション</a>』、『<a story="イブリン修復プログラム">イブリン修復プログラム</a>』、『太陽が沈んでも、あなたが輝いていますように(日本未実装)』の舞台。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ハゲワシ</h3>
+    <div>伝説的な傭兵。その実力は全傭兵の中でもトップと言われていたが、『<a story="彼方の風">彼方の風</a>』でゼロに負けた。<br/>
+      <a move="団長">団長</a>の養父であり、鬼影灯の実父。ブラックアークの設立においては量産機やベースカーなどの多くの技術を提供した。<br/>
+      <a move="第2次侵略戦争">第2次侵略戦争</a>の終結間際、イブリンの要請を受けて『<a move="電子世界">電子世界</a>』から団長を助け出して育て上げた。
+      ブラックアーク解散後は行方をくらませている。彼の専用機はレベリカが改造して使っている。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>団長</h3>
+    <div>『ファイナルギア』の主人公。イブリンの弟。バーベキューが得意？<br/>
+      その正体は『<a move="電子世界">電子世界</a>』で生まれた住人。本来電子世界では子供など生まれないはずだったが、なぜか誕生した団長は異分子として処分されるはずだった。それを察知した姉のイブリンが外の世界に救出の要請を出し、それをキャッチした<a move="ハゲワシ">ハゲワシ</a>が現実世界に連れ出し育てた。この話は『イブリンストーリー』の<a href="https://youtu.be/aIql2c6rTsI?list=PLK_mgOblIglp4shc1hxF10n5GXzQGbZKh&t=76" target="_blank">隠しエンディング</a>に登場する。<br/>
+      そのため電子世界は今でも団長の行方を追っている。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="ヘルシーアンドハッピーエブリデイ">
+  <span style="font-size:0.8rem;"><h1>ヘルシーアンドハッピーエブリデイ</h1></span>
+  <div class="word" data-open="0">
+    <h3>ヘルハピの成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/ヘルハピ.jpg"/>名前が非常に長いため、ヘルハピと略される。中国語では「健康快乐每一天」なのであまり略されない。<br/>
+      運命により集ったメンバー。隊長のフラビアが<a move="帝国フォーグリン学院">帝国フォーグリン学院</a>出身のため学院のメンバーが多い。ほとんどのメンバーは成り行きでヘルハピに加入した。隊員はパトリシア、ソルヴェイグ、紫、シャディッティ、華蘭、イヴェット。<br/>
+      ヘルハピの物語は『<a story="国境紛争">国境紛争</a>』全体を通して語られる。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="パラノイド">
+  <h1>パラノイド</h1>
+  <div class="word" data-open="0">
+    <h3>パラノイドの成り立ち</h3>
+    <div><img width="100%" s="./辞書画像/パラノイド.jpg"/>どのような経緯で設立したのか今のところ一切が謎。リーダーはハエラ。副官的な位置でドロレス。メンバーにイーレヒース、夜喰、PN99、ヒスタス。メンバーにはPNのナンバリングがつく。<br/>
+      『マーグレットストーリー』や『臨界点』、『<a story="空の鏡">空の鏡</a>』、『<a story="嵐の夜のおとぎ話">嵐の夜のおとぎ話</a>』など様々なところで暗躍している。<br/>
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ハエラの目的</h3>
+    <div><img width="100%" s="./辞書画像/ハエラ.jpg"/>
+      ハエラは<a move="ノーヴァの鍵">ノーヴァの鍵</a>を手に入れるため<a move="アグネス">アグネス</a>を探していた。その目的は不明。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="アグネスの関係者">
+  <h1>アグネスの関係者</h1>
+  <div class="word" data-open="0">
+    <h3>アグネス</h3>
+    <div><img width="100%" s="./辞書画像/アグネス.jpg"/>ダークメテオの研究を行っている科学者。<a move="黒皇后聖典">黒皇后聖典</a>の力により悠久の時を生きる永遠の生者。<br/>
+      かつては旧時代の<a move="アンドレイ・アウグスティヌス">アンドレイ</a>の助手であり純粋な科学者であったが、何らかの原因で豹変してしまった。何らかの思想を持っており大陸中に<a move="アグネスの協力者">協力者</a>がいる。<br/>
+      『エリザベスの個人クエスト』ではイーレヒースによってアグネスが目覚めるまで900年かかったことが判明する。
+      『全面戦争』や『<a story="空の鏡">空の鏡</a>』に登場。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アグネスの協力者</h3>
+    <div>アグネスの思想に共感し協力する者たち。ヘプニェク、アフラ、アーリンなど。また、孤児院の孤児などを<a move="人形使い">人形使い</a>に改造し、手下としている。<br/>
+      その多くは世界の変化を観測する観測者。ヘプニェクはアグネスの手足となって動く実働部隊でもある。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アンドレイ・アウグスティヌス</h3>
+    <div>『全面戦争』に登場。旧時代の研究者でアグネスの師匠。<br/>
+      最初に<a move="黒皇后聖典">黒皇后聖典</a>を解読した人物で、自分が<a mve="メテオインパクト">メテオインパクト</a>を招いたのではないかと考え後悔し、償おうと奔走する。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+<div id="その他">
+  <h1>その他</h1>
+  <div class="word" data-open="0">
+    <h3>黒皇后聖典</h3>
+    <div>『全面戦争』に登場する謎の書物。旧時代の発展した人間の化学よりも100年は先を行っているとされる。しかしその言語は地球の言葉ではなく解読は困難。<br/>
+      いくつかの解読で寿命からの開放などの有益な技術が得られたため、<a move="アンドレイ・アウグスティヌス">アンドレイ</a>は解読した端から次々と成果物を作った。その中に謎の電波を発信するビーコンが含まれていた。アンドレイはこれが<a move="メテオインパクト">メテオインパクト</a>を引き寄せたと考えている。装置はのちに破壊されたが手遅れだった。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>聚魂の書</h3>
+    <div>『<a story="彼方の風">彼方の風</a>』に登場するゼロが所有する書物。ゼロはこの書から得た知識を黒魔術と称し使って、物質の転送や小型ブラックホールの生成に成功している。<br/>
+      <a move="黒皇后聖典">黒皇后聖典</a>との関係は不明。ナコトリスも同様の書を所持している可能性がある。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ノーヴァの鍵</h3>
+    <div>『<a story="空の鏡">空の鏡</a>』に登場する。謎の物。アグネスが所有していた。<br/>
+      <a move="イーノル人">イーノル人</a>となんらかの関係がありそうな物。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>孤島の研究所</h3>
+    <div>『<a story="ハンガーゲームズ">ザ・ハンガーゲームズ</a>』の舞台。どこかの離れ小島。<br/>
+      ここには旧時代から人間の記憶を操作し、人間に擬態して紛れ込む寄生虫が存在していた。彼らは争いのない美しい星から来たと言っている。<br/>
+      しかしこの島の地下には「もっと恐ろしいもの」が存在し、その電磁波が人間を狂気に陥れるとも証言している。結局『ザ・ハンガーゲームズ』ではその正体は不明なまま幕を閉じた。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>月面</h3>
+    <div><img width="100%" s="./辞書画像/月面運送会社.jpg"/>
+      大陸中を行動範囲とする運送会社。コディスとシャコガイが取締役。『<a story="月面大暴走">月面大暴走</a>』をはじめとする複数のイベントに登場する。<br/>
+      一流の運送会社とのことだが、イベントに登場するたびに必ずトラブルが発生する。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>イーノル人</h3>
+    <div><img width="30%" s="./辞書画像/イーノル人遺跡.jpg"/>『全面戦争』に登場する謎の種族。恐らくはノーヴァと同じ宇宙人。地表から15,000メートル以上もの地底に遺跡がある。<a move="地底世界">地底世界</a>との関係は謎。<br/>
+      恐らく<a move="黒皇后聖典">黒皇后聖典</a>となんらかの関係がある種族。<br/>
+      <a move="アンドレイ・アウグスティヌス">アンドレイ</a>は地底の建造物を”遺跡”と称するのがふさわしいと評しており、<a move="メテオインパクト">メテオインパクト</a>からあまり時間のたっていない時期でもあったため、遺跡と隕石は同一のものではないかもしれない。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>アイノア</h3>
+    <div>『<a story="おはようネクリエス">おはようネクリエス</a>』でクリスティーナの夢に出てきた魔女。<br/>
+      夢の話だが、クリスティーナは実在すると考えているようだ。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>被検体663番</h3>
+    <div><a move="帝国フォーグリン学院">帝国フォーグリン学院</a>にて<a move="ファントム計画">ファントム計画</a>のブレインとして研究されていた被検体。<br/>
+      ブレインとして高い適性を示していたが、実験を急ぎ過ぎたため暴走。パトリシアが右足を失うなどの被害を出して廃棄された。『<a story="国境紛争">国境紛争</a>』に登場。<br/>
+      その正体はサイボーグ改造をされたイヴェット。改造の際に記憶を失っていたがドロレスの助けで一部の記憶を取り戻した。<br/>
+      なお、663番は日本版独自のナンバリング。中国語版ではただの被検体と呼ばれてる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ネブラ</h3>
+    <div>3大勢力に囲まれた中立地帯。中立地帯とは名ばかりで全勢力が進出してくるため争いが絶えない無法地帯と化している。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>ジヌンガ海峡</h3>
+    <div>ケゲアとアイレタの間にある狭い海峡。陸路ではないが一番近い国境のためたびたび紛争の中心となる。
+    </div>
+  </div>
+  <div class="word" data-open="0">
+    <h3>平和の時代</h3>
+    <div>新暦59年から新暦60年の大きな戦争がなかった年のこと。ファイナルギアの物語は新暦60年に始まる。<br/>
+      しかしこの間各勢力は着々と戦争の準備を進めており、<a move="アグネス">アグネス</a>なども暗躍を始めた年でもあった。<br/>
+      結果として<a move="ケゲア内乱">ケゲアの内乱</a>をきっかけに各勢力が動き出し、新暦61年には全面戦争へと発展した。
+    </div>
+  </div>
+</div><!--カテゴリ-->
+      </div>
+    <!-- フッター -->
+    <br/><br/>
+    <div id="footer">
+      <p>created by ほげん(hogen_feh@twitter.com)</p>
+      <p><a href="https://game.bilibili.co.jp/finalgear/">©ファイナルギア</a>　　<a href="https://game.bilibili.co.jp/">©bilibili</a></p>
+    </div>
+    <script>
+      {
+        document.wordHistory = [];
+        var readerAnimator = new StoryAnimation();
+        readerAnimator.actionCSS(null);
+        window.onload = function() {
+        document.finalDictionary = new FinalDictionary();
+        document.finalDictionary.init();
+        }
+        function showStory(name,event){
+          window.open('./?story='+encodeURI(name));
+          event.stopPropagation();
+        }
+        function moveWord(name,event){
+          document.finalDictionary.showWord(name);
+          var word = document.finalDictionary.getWordfromChild(event.target);
+          if(word)document.wordHistory.push(word);
+          event.stopPropagation();
+        }
+        function movetoTop(){
+          var word = document.wordHistory.pop();
+          if(word)document.finalDictionary.showWord(word.name);
+          else window.scrollTo({top: 0,behavior: 'smooth'});
+        }
+        function searchKeyWord(event){
+          if(!event)return;
+          document.finalDictionary.search(event.target.value);
+        }
+      }
+    </script>
+    </div></div>
+  </body>
+</html>
